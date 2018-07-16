@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
   port: 3306,
   user: "root",
   // add password for your database here
-  password: "root",
+  password: "",
   database: "bamazon"
 });
 
@@ -28,7 +28,7 @@ function purchase() {
   connection.query("SELECT * FROM products", function(err, results) {
     if (err) throw err;
     for (var i = 0; i < results.length; i++) {
-      console.log("Item ID: " + results[i].item_id + " | " + "Product Name: " + results[i].product_name + " | " + "Price: " + results[i].price);
+      console.log("Item ID: " + results[i].item_id + " | " + "Product Name: " + results[i].product_name + " | " + "Price: " + (results[i].price).toFixed(2));
     }
     console.log("\n************************************************************\n");
 
@@ -90,7 +90,7 @@ function purchase() {
               console.log(chosenItem.product_name + "(s) purchased!");
               // after update completes show user total cost of their purchase
               var total = chosenItem.price * answer.purchaseNumber;
-              console.log("Total: $" + total);
+              console.log("Total: $" + total.toFixed(2));
               purchase();
             }
           );
