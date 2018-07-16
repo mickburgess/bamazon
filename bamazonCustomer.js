@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
   port: 3306,
   user: "root",
   // add password for your database here
-  password: "",
+  password: "root",
   database: "bamazon"
 });
 
@@ -25,22 +25,85 @@ function purchase() {
   // display all the items available for sale
   // include the id's, names, and prices of products for sale
   console.log("\n************************************************************\n");
-  connection.query("SELECT item_id, product_name, price FROM products", function(err, results) {
+  connection.query("SELECT * FROM products", function(err, results) {
     if (err) throw err;
-    var separator = "\n-------------------\n";
     for (var i = 0; i < results.length; i++) {
       console.log("Item ID: " + results[i].item_id + " | " + "Product Name: " + results[i].product_name + " | " + "Price: " + results[i].price);
     }
     console.log("\n************************************************************\n");
+
+    inquirer
+      .prompt([
+        // ask the user the id of the product they would like to buy
+        {
+          name: "item",
+          type: "input",
+          message: "What is the id of the item you wish to purchase?",
+          validate: function(value) {
+            if (isNaN(value) === false) {
+              return true;
+            }
+            console.log("\nPlease enter an id");
+            return false;
+          }
+        },
+        // ask the user the number of units they would like to buy
+        {
+          name: "purchaseNumber",
+          type: "input",
+          message: "How many would you like to purchase?",
+          validate: function(value) {
+            if (isNaN(value) === false) {
+              return true;
+            }
+            console.log("\nPlease enter a number");
+            return false;
+          }
+        }
+      ])
+      .then(function(answer) {
+        var chosenItem;
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].item_id == answer.item) 
+          {
+            chosenItem = results[i];
+            console.log(chosenItem);
+          }
+        }
+        // check if there is enough product to meet the customers request
+        if (chosenItem.stock_quantity > answer.purchaseNumber) {
+          var newQuantity = chosenItem.stock_quantity - answer.purchaseNumber
+          console.log(newQuantity);
+          connection.query(
+            // update the db to reflect the remaining quantity
+            "UPDATE products SET ? WHERE ?",
+            [
+              {
+                stock_quantity: newQuantity
+              },
+              {
+                item_id: chosenItem.item_id
+              }
+            ],
+            function(error) {
+              if (error) throw err;
+              console.log(chosenItem.product_name + "(s) purchased!");
+              // after update completes show user total cost of their purchase
+              var total = chosenItem.price * answer.purchaseNumber;
+              console.log("Total: $" + total);
+              purchase();
+            }
+          );
+        }
+        else {
+          // Purchase attempt quantity greater than stock quantity, so start over without order being logged
+          console.log("Sorry your order was larger than amount of stock remaining. Please try again.");
+          purchase();
+        }
+      });
   })
 }
-// ask the user the id of the product they would like to buy
 
-// ask the user the number of units they would like to buy
-
-// check if there is enough product to meet the customers request
-  // if not enough console.log "Insufficient quantity!"
-    // prevent the order from being placed
   // if there is enough fulfill the customer's order
-    // update the db to reflect the remaining quantity
-    // after update completes show user total cost of their purchase
+    
+    
