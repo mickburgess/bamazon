@@ -28,7 +28,7 @@ function purchase() {
   connection.query("SELECT * FROM products", function(err, results) {
     if (err) throw err;
     for (var i = 0; i < results.length; i++) {
-      console.log("Item ID: " + results[i].item_id + " | " + "Product Name: " + results[i].product_name + " | " + "Price: " + (results[i].price).toFixed(2));
+      console.log("Item ID: " + results[i].item_id + " | " + "Product Name: " + results[i].product_name + " | " + "Price: $" + (results[i].price).toFixed(2));
     }
     console.log("\n************************************************************\n");
 
@@ -104,6 +104,5 @@ function purchase() {
   })
 }
 
-  // if there is enough fulfill the customer's order
     
     
