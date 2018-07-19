@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
   port: 3306,
   user: "root",
   // add password for your database here
-  password: "",
+  password: "root",
   database: "bamazon"
 });
 
@@ -40,10 +40,10 @@ function purchase() {
           type: "input",
           message: "What is the id of the item you wish to purchase?",
           validate: function(value) {
-            if (isNaN(value) === false) {
+            if (isNaN(value) === false && value <= results.length) {
               return true;
             }
-            console.log("\nPlease enter an id");
+            console.log("\nPlease enter a valid id");
             return false;
           }
         },
@@ -67,13 +67,11 @@ function purchase() {
           if (results[i].item_id == answer.item) 
           {
             chosenItem = results[i];
-            console.log(chosenItem);
           }
         }
         // check if there is enough product to meet the customers request
-        if (chosenItem.stock_quantity > answer.purchaseNumber) {
+        if (chosenItem.stock_quantity >= answer.purchaseNumber) {
           var newQuantity = chosenItem.stock_quantity - answer.purchaseNumber
-          console.log(newQuantity);
           connection.query(
             // update the db to reflect the remaining quantity
             "UPDATE products SET ? WHERE ?",
@@ -87,7 +85,7 @@ function purchase() {
             ],
             function(error) {
               if (error) throw err;
-              console.log(chosenItem.product_name + "(s) purchased!");
+              console.log(answer.purchaseNumber + " " + chosenItem.product_name + "(s) purchased!");
               // after update completes show user total cost of their purchase
               var total = chosenItem.price * answer.purchaseNumber;
               console.log("Total: $" + total.toFixed(2));

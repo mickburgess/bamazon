@@ -83,5 +83,67 @@ function lowInventory() {
   })
 }
 // * If a manager selects `Add to Inventory`, your app should display a prompt that will let the manager "add more" of any item currently in the store.
+function addInventory() {
+  console.log("\n************************************************************\n");
+  connection.query("SELECT item_id, product_name, price, stock_quantity FROM products", function (err, results) {
+    if (err) throw err;
+    for (var i = 0; i < results.length; i++) {
+      console.log("ID: " + results[i].item_id + " | " + "Product: " + results[i].product_name + " | " + "Price: $" + (results[i].price).toFixed(2) + " | " + "Quantity " + results[i].stock_quantity);
+    }
+    console.log("\n************************************************************\n");
 
+    inquirer
+      .prompt([
+        {
+          name: "addMore",
+          type: "input",
+          message: "What is the id of the item you wish to add stock?",
+          validate: function(value) {
+            if (isNaN(value) === false && value <= results.length) {
+              return true;
+            }
+            console.log("\nPlease enter a valid id");
+            return false;
+          }
+        },
+        // ask the user the number of units they would like to buy
+        {
+          name: "stockNumber",
+          type: "input",
+          message: "How much stock would you like to add?",
+          validate: function (value) {
+            if (isNaN(value) === false) {
+              return true;
+            }
+            console.log("\nPlease enter a number");
+            return false;
+          }
+        }
+      ])
+      .then(function (answer) {
+        var chosenItem;
+        for (var i = 0; i < results.length; i++) {
+          if (results[i].item_id == answer.addMore) {
+            chosenItem = results[i];
+            console.log(chosenItem);
+          }
+        }
+        var newQuantity = parseInt(chosenItem.stock_quantity) + parseInt(answer.stockNumber);
+        console.log(newQuantity);
+        connection.query("UPDATE products SET ? WHERE ?",
+          [
+            {
+              stock_quantity: newQuantity
+            },
+            {
+              item_id: chosenItem.item_id
+            }
+          ],
+        function(error) {
+          if (error) throw err;
+          console.log(chosenItem.product_name + " restocked.");
+        })
+      })
+  })
+}
 // * If a manager selects `Add New Product`, it should allow the manager to add a completely new product to the store.
