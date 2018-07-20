@@ -98,7 +98,7 @@ function addInventory() {
           name: "addMore",
           type: "input",
           message: "What is the id of the item you wish to add stock?",
-          validate: function(value) {
+          validate: function (value) {
             if (isNaN(value) === false && value <= results.length) {
               return true;
             }
@@ -125,11 +125,9 @@ function addInventory() {
         for (var i = 0; i < results.length; i++) {
           if (results[i].item_id == answer.addMore) {
             chosenItem = results[i];
-            console.log(chosenItem);
           }
         }
         var newQuantity = parseInt(chosenItem.stock_quantity) + parseInt(answer.stockNumber);
-        console.log(newQuantity);
         connection.query("UPDATE products SET ? WHERE ?",
           [
             {
@@ -139,11 +137,69 @@ function addInventory() {
               item_id: chosenItem.item_id
             }
           ],
-        function(error) {
-          if (error) throw err;
-          console.log(chosenItem.product_name + " restocked.");
-        })
-      })
-  })
+          function (error) {
+            if (error) throw err;
+            console.log(chosenItem.product_name + " restocked.");
+            manager();
+          });
+      });
+
+  });
 }
+
 // * If a manager selects `Add New Product`, it should allow the manager to add a completely new product to the store.
+function addProd() {
+  inquirer
+    .prompt([
+      {
+        name: "product",
+        type: "input",
+        message: "What product would you like to add?"
+      },
+      {
+        name: "department",
+        type: "input",
+        message: "What department should this product be added to?"
+      },
+      {
+        name: "price",
+        type: "input",
+        message: "What is the price of this product?",
+        validate: function (value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          console.log("\nPlease enter a number");
+          return false;
+        }
+      },
+      {
+        name: "quantity",
+        type: "input",
+        message: "How many are being stocked?",
+        validate: function (value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          console.log("\nPlease enter a number");
+          return false;
+        }
+      }
+    ])
+    .then(function (answer) {
+      connection.query("INSERT INTO products SET ?",
+        {
+          product_name: answer.product,
+          department_name: answer.department,
+          price: answer.price,
+          stock_quantity: answer.quantity
+        },
+        function (err) {
+          if (err) throw err;
+          console.log(answer.product + " was successfully added.");
+          // re-prompt the user for if they want to bid or post
+          manager();
+        }
+      )
+    });
+}
