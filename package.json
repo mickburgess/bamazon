@@ -19,6 +19,7 @@
   "homepage": "https://github.com/mickburgess/bamazon#readme",
   "dependencies": {
     "inquirer": "^6.0.0",
+    "lodash": "^4.17.11",
     "mysql": "^2.15.0"
   }
 }
